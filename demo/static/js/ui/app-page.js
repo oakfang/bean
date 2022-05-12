@@ -1,4 +1,4 @@
-import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
+import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
 import state from "/static/js/state.js";
 import "./app-header.js";
 import "./app-nav.js";
@@ -14,8 +14,8 @@ class AppPage extends WebComponent {
     <app-header>
       <h2 slot="extra"></h2>
       <app-nav slot="navigation">
-        <nav-item to="/#/" text="Home"></nav-item>
-        <nav-item to="/#/about" text="About"></nav-item>
+        <nav-item to="/" text="Home"></nav-item>
+        <nav-item to="/about" text="About"></nav-item>
       </app-nav>
     </app-header>
     <slot></slot>

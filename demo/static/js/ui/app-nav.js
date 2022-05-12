@@ -1,4 +1,4 @@
-import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
+import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
 
 class NavItem extends WebComponent {
   static tagName = "nav-item";

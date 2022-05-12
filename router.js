@@ -1,39 +1,95 @@
-import { createAsyncComponent, WebComponent } from "./base.js";
+import {
+  createAsyncComponent,
+  WebComponent,
+  createWebComponentClass,
+  prop,
+} from "./base.js";
 import { ValueStream } from "./vstream.js";
 
-function processHash(hash = "#/") {
-  const hashlessRoute = hash.replace(/^#/, "");
-  const [rawPath, search] = hashlessRoute.split("?");
-  const searchParams = new URLSearchParams(search);
-  const pathParts = rawPath.split("/");
-  if (pathParts[0]) {
-    pathParts.unshift("");
+export class PageProvider {
+  type = "browser";
+
+  constructor() {
+    this.setup();
+    this.stream = new ValueStream(this.getPage());
   }
-  const path = pathParts.join("/");
-  return { searchParams, path };
+
+  setup() {
+    // no need to do anything
+  }
+
+  getHref() {
+    return window.location.href;
+  }
+
+  getPage = (href = this.getHref()) => {
+    return new URL(href);
+  };
+
+  pushPage = (href) => {
+    this.stream.update(() => this.getPage(href));
+  };
+
+  applyNavigation = (e) => {
+    // Some navigations, e.g. cross-origin navigations, we cannot intercept. Let the browser handle those normally.
+    if (!e.canTransition) {
+      return;
+    }
+
+    // Don't intercept fragment navigations or downloads.
+    if (e.hashChange || e.downloadRequest) {
+      return;
+    }
+
+    e.transitionWhile(this.pushPage(e.destination.url));
+  };
+
+  attachEvents() {
+    window.navigation.addEventListener("navigate", this.applyNavigation);
+  }
+
+  detachEvents() {
+    window.navigation.removeEventListener("navigate", this.applyNavigation);
+  }
 }
 
-export function createPageStream() {
-  if (!window.location.hash) {
-    window.history.replaceState(null, document.title, "/#/");
+export class HashPageProvider extends PageProvider {
+  type = "hash";
+
+  setup() {
+    if (!window.location.hash) {
+      window.history.replaceState(null, document.title, "/#/");
+    }
   }
-  const pageStream = new ValueStream(processHash(window.location.hash));
-  const onHashChange = () => {
-    pageStream.update(() => processHash(window.location.hash));
-  };
-  window.addEventListener("hashchange", onHashChange);
 
-  const preventDefault = (e) => e.preventDefault();
-  window.addEventListener("popstate", preventDefault);
+  getHref() {
+    const hash = window.location.hash || "#/";
+    const partialLocation = hash.replace(/^#/, "");
+    return `${window.location.origin}${partialLocation}`;
+  }
 
-  Object.defineProperty(pageStream, "stop", {
-    value() {
-      window.removeEventListener("hashchange", onHashChange);
-      window.removeEventListener("popstate", preventDefault);
-    },
-  });
+  preventDefault(event) {
+    event.preventDefault();
+  }
 
-  return pageStream;
+  applyNavigation = () => this.pushPage();
+
+  attachEvents() {
+    window.addEventListener("hashchange", this.applyNavigation);
+    window.addEventListener("popstate", this.preventDefault);
+  }
+
+  detachEvents() {
+    window.removeEventListener("hashchange", this.applyNavigation);
+    window.removeEventListener("popstate", this.preventDefault);
+  }
+}
+
+export function createPageProvider() {
+  if (window.navigation) {
+    return new PageProvider();
+  }
+  return new HashPageProvider();
 }
 
 (class AppRouter extends WebComponent {
@@ -53,9 +109,9 @@ export function createPageStream() {
   };
 
   async forkPageUpdates() {
-    for await (const pageParams of this.pageStream) {
+    for await (const pageParams of this.pageProvider.stream) {
       if (!this.isConnected) {
-        this.pageStream.stop();
+        this.pageProvider.detachEvents();
         return;
       }
       const page = await createAsyncComponent(this.routingCallback(pageParams));
@@ -69,17 +125,18 @@ export function createPageStream() {
     if (!this.routingCallback) {
       throw new Error("No routing callback provided");
     }
-    if (!this.pageStream) {
-      this.pageStream = createPageStream();
+    if (!this.pageProvider) {
+      this.pageProvider = createPageProvider();
     }
+    this.pageProvider.attachEvents();
     this.forkPageUpdates();
   }
 }.setup());
 
-export function createRouter(routingCallback, pageStream) {
+export function createRouter(routingCallback, pageProvider) {
   const router = document.createElement("app-router");
   router.routingCallback = routingCallback;
-  router.pageStream = pageStream;
+  router.pageProvider = pageProvider;
 
   return router;
 }

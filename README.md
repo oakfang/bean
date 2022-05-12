@@ -2,14 +2,15 @@
 
 An unapologetically modern, build-free, Frontend infrastructure
 
-## Current Release: **Cocoa**
+## Current Release: **Coffee**
 
 Features:
 
 - Zero build tools
 - Enhanced Web Components
 - Stream based state updates
-- Hash routing (waiting on the [navigation API](https://chromestatus.com/feature/6232287446302720) for better routing)
+- Fully native SPA routing
+  - Falling back to hash routing if unsupported (temporarily, while unavailable in Chrome proper)
 
 ## Usage
 
@@ -20,7 +21,7 @@ import {
   WebComponent,
   prop,
   on,
-} from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
+} from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
 
 (class extends WebComponent {
   static tagName = "my-component";
@@ -52,7 +53,7 @@ import {
 ### State
 
 ```js
-import { ValueStream } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/vstream.js";
+import { ValueStream } from "https://cdn.jsdelivr.net/gh/oakfang/bean/vstream.js";
 
 const stateManager = new ValueStream({
   todos: null,
@@ -70,7 +71,7 @@ stateManager.update((current) => ({ ...current, todos: ["a", "b", "c"] }));
 ### Routing
 
 ```js
-import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/router.js";
+import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean/router.js";
 
 const router = createRouter(({ path }) => {
   switch (path) {

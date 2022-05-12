@@ -1,4 +1,4 @@
-import { WebComponent, prop, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
+import { WebComponent, prop, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
 import { UPDATE_TODO, DELETE_TODO } from "./consts.js";
 
 export default (class extends WebComponent {

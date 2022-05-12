@@ -1,7 +1,7 @@
-import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/router.js";
+import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean/router.js";
 
-const router = createRouter(({ path }) => {
-  switch (path) {
+const router = createRouter(({ pathname }) => {
+  switch (pathname) {
     case "/": {
       return import("./home.js");
     }
