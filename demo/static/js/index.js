@@ -1,4 +1,4 @@
-import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean/router.js";
+import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/router.js";
 
 const router = createRouter(({ path }) => {
   switch (path) {

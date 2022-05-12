@@ -1,4 +1,4 @@
-import { WebComponent, createAsyncComponent } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import { WebComponent, createAsyncComponent } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 import "./ui/app-page.js";
 
 class HomePage extends WebComponent {

@@ -1,4 +1,4 @@
-import { WebComponent } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import { WebComponent } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 import "./ui/app-page.js";
 
 class PageNotFound extends WebComponent {

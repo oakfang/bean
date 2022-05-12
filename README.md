@@ -20,7 +20,7 @@ import {
   WebComponent,
   prop,
   on,
-} from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+} from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 
 (class extends WebComponent {
   static tagName = "my-component";
@@ -52,7 +52,7 @@ import {
 ### State
 
 ```js
-import { ValueStream } from "https://cdn.jsdelivr.net/gh/oakfang/bean/vstream.js";
+import { ValueStream } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/vstream.js";
 
 const stateManager = new ValueStream({
   todos: null,
@@ -70,7 +70,7 @@ stateManager.update((current) => ({ ...current, todos: ["a", "b", "c"] }));
 ### Routing
 
 ```js
-import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean/router.js";
+import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/router.js";
 
 const router = createRouter(({ path }) => {
   switch (path) {

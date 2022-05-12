@@ -1,4 +1,4 @@
-import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 
 class AppHeader extends WebComponent {
   static tagName = "app-header";

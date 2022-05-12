@@ -1,4 +1,4 @@
-import { WebComponent, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import { WebComponent, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 import state from "/static/js/state.js";
 import { UPDATE_TODO, DELETE_TODO, CREATE_TODO } from "./consts.js";
 import { getTodos, putTodo, deleteTodo, postTodo } from "./api.js";

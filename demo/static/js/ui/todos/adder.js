@@ -1,4 +1,4 @@
-import { WebComponent, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import { WebComponent, on } from "https://cdn.jsdelivr.net/gh/oakfang/bean@cocoa/base.js";
 import { CREATE_TODO } from "./consts.js";
 
 export default (class extends WebComponent {
