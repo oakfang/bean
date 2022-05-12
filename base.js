@@ -73,7 +73,13 @@ export class WebComponent extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    this.emit(`${name}:change`, [newValue ?? undefined, oldValue ?? undefined]);
+    this.emit(
+      `${name}:change`,
+      [newValue ?? undefined, oldValue ?? undefined],
+      {
+        bubbles: false,
+      }
+    );
   }
 
   emit(eventName, value, options = {}) {

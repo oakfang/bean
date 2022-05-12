@@ -1,0 +1,11 @@
+{
+  "name": "bean-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server --bind localhost 8000"
+  },
+  "author": "Alon Niv",
+  "license": "MIT"
+}
