@@ -1,9 +1,4 @@
-import {
-  createAsyncComponent,
-  WebComponent,
-  createWebComponentClass,
-  prop,
-} from "./base.js";
+import { createAsyncComponent, WebComponent } from "./base.js";
 import { ValueStream } from "./vstream.js";
 
 export class PageProvider {
@@ -30,7 +25,7 @@ export class PageProvider {
     this.stream.update(() => this.getPage(href));
   };
 
-  applyNavigation = (e) => {
+  #applyNavigation = (e) => {
     // Some navigations, e.g. cross-origin navigations, we cannot intercept. Let the browser handle those normally.
     if (!e.canTransition) {
       return;
@@ -45,11 +40,11 @@ export class PageProvider {
   };
 
   attachEvents() {
-    window.navigation.addEventListener("navigate", this.applyNavigation);
+    window.navigation.addEventListener("navigate", this.#applyNavigation);
   }
 
   detachEvents() {
-    window.navigation.removeEventListener("navigate", this.applyNavigation);
+    window.navigation.removeEventListener("navigate", this.#applyNavigation);
   }
 }
 
@@ -68,20 +63,20 @@ export class HashPageProvider extends PageProvider {
     return `${window.location.origin}${partialLocation}`;
   }
 
-  preventDefault(event) {
+  #preventDefault(event) {
     event.preventDefault();
   }
 
-  applyNavigation = () => this.pushPage();
+  #applyNavigation = () => this.pushPage();
 
   attachEvents() {
-    window.addEventListener("hashchange", this.applyNavigation);
-    window.addEventListener("popstate", this.preventDefault);
+    window.addEventListener("hashchange", this.#applyNavigation);
+    window.addEventListener("popstate", this.#preventDefault);
   }
 
   detachEvents() {
-    window.removeEventListener("hashchange", this.applyNavigation);
-    window.removeEventListener("popstate", this.preventDefault);
+    window.removeEventListener("hashchange", this.#applyNavigation);
+    window.removeEventListener("popstate", this.#preventDefault);
   }
 }
 
@@ -108,7 +103,11 @@ export function createPageProvider() {
     container: (dom) => dom.querySelector("div"),
   };
 
-  async forkPageUpdates() {
+  get type() {
+    return this.pageProvider.type;
+  }
+
+  async #forkPageUpdates() {
     for await (const pageParams of this.pageProvider.stream) {
       if (!this.isConnected) {
         this.pageProvider.detachEvents();
@@ -129,7 +128,7 @@ export function createPageProvider() {
       this.pageProvider = createPageProvider();
     }
     this.pageProvider.attachEvents();
-    this.forkPageUpdates();
+    this.#forkPageUpdates();
   }
 }.setup());
 

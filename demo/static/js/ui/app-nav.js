@@ -1,4 +1,7 @@
-import { WebComponent, prop } from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+import {
+  WebComponent,
+  prop,
+} from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
 
 class NavItem extends WebComponent {
   static tagName = "nav-item";
@@ -22,12 +25,16 @@ class NavItem extends WebComponent {
     anchor: (dom) => dom.querySelector("a"),
   };
 
+  get router() {
+    return this.closestElement("app-router");
+  }
+
   [prop("text")](_, [text]) {
     this.anchor.textContent = text;
   }
 
   [prop("to")](_, [link]) {
-    this.anchor.href = link;
+    this.anchor.href = this.router.type === "browser" ? link : `#${link}`;
   }
 }
 

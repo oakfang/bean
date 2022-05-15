@@ -91,6 +91,16 @@ export class WebComponent extends HTMLElement {
     });
     this.dispatchEvent(event);
   }
+
+  closestElement(selector) {
+    let el = this;
+    let result = el.closest(selector);
+    while (!result && el !== document && el !== window && el) {
+      el = el.getRootNode().host;
+      result = el.closest(selector);
+    }
+    return result;
+  }
 }
 
 export async function createAsyncComponent(

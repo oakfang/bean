@@ -1,0 +1,24 @@
+{
+  "name": "bean",
+  "version": "1.0.0",
+  "description": "An unapologetically modern, build-free, Frontend infrastructure",
+  "main": "base.js",
+  "private": true,
+  "scripts": {
+    "test": "serve --cors"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oakfang/bean.git"
+  },
+  "keywords": [],
+  "author": "Alon Niv",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oakfang/bean/issues"
+  },
+  "homepage": "https://github.com/oakfang/bean#readme",
+  "devDependencies": {
+    "serve": "^13.0.2"
+  }
+}
