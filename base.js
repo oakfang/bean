@@ -25,7 +25,7 @@ export class WebComponent extends HTMLElement {
     this.dom = this.attachShadow({ mode: "open" });
     this.template = document.createElement("template");
     this.template.innerHTML = this.constructor.html ?? "";
-    this._setupInDOM();
+    this.#setupInDOM();
   }
 
   connectedCallback() {
@@ -33,9 +33,16 @@ export class WebComponent extends HTMLElement {
     Object.keys(defaultAttributes).forEach((attribute) => {
       this.setAttribute(attribute, defaultAttributes[attribute]);
     });
+    if (this.isConnected) {
+      this.onAfterMount();
+    }
   }
 
-  _setupInDOM() {
+  disconnectedCallback() {
+    this.onAfterUnmount();
+  }
+
+  #setupInDOM() {
     const root = this.template.content.cloneNode(true);
     Object.keys(this.constructor.handles ?? {}).forEach((handle) => {
       const handler = this.constructor.handles[handle];
@@ -68,8 +75,8 @@ export class WebComponent extends HTMLElement {
       );
     });
 
-    this.onBeforeMount?.();
     this.dom.appendChild(root);
+    this.onBeforeMount();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -100,6 +107,18 @@ export class WebComponent extends HTMLElement {
       result = el.closest(selector);
     }
     return result;
+  }
+
+  onBeforeMount() {
+    // do nothing
+  }
+
+  onAfterMount() {
+    // do nothing
+  }
+
+  onAfterUnmount() {
+    // do nothing
   }
 }
 
