@@ -1,4 +1,6 @@
 export class WebComponent extends HTMLElement {
+  #connectionController = new AbortController();
+
   static setup() {
     const events = {};
     const attributes = [];
@@ -39,6 +41,7 @@ export class WebComponent extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this.#connectionController.abort();
     this.onAfterUnmount();
   }
 
@@ -77,6 +80,10 @@ export class WebComponent extends HTMLElement {
 
     this.dom.appendChild(root);
     this.onBeforeMount();
+  }
+
+  get connectionSignal() {
+    return this.#connectionController.signal;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

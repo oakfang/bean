@@ -5,7 +5,7 @@
   "main": "base.js",
   "private": true,
   "scripts": {
-    "test": "serve --cors"
+    "test": "PORT=4001 serve --cors"
   },
   "repository": {
     "type": "git",

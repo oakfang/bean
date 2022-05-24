@@ -37,4 +37,25 @@ export class ValueStream {
       yield this.#value;
     }
   }
+
+  async *untilCancelled({ signal }) {
+    if (signal.aborted) {
+      return;
+    }
+    const signalTriggered = new Promise((_resolve, reject) => {
+      signal.addEventListener("abort", reject, { once: true });
+    });
+    yield this.#value;
+    try {
+      while (!signal.aborted) {
+        await Promise.race([
+          new Promise((resolve) => {
+            this.#resolvers.add(resolve);
+          }),
+          signalTriggered,
+        ]);
+        yield this.#value;
+      }
+    } catch {}
+  }
 }
