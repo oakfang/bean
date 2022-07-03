@@ -1,23 +1,12 @@
-import { createAsyncComponent, WebComponent } from "./base.js";
+import { createAsyncComponent, WebComponent, child } from "./base.js";
 import { ValueStream } from "./vstream.js";
 
 export class PageProvider {
-  type = "browser";
-
   constructor() {
-    this.setup();
-    this.stream = new ValueStream(this.getPage());
+    this.stream = new ValueStream(this.getPage(window.location.href));
   }
 
-  setup() {
-    // no need to do anything
-  }
-
-  getHref() {
-    return window.location.href;
-  }
-
-  getPage = (href = this.getHref()) => {
+  getPage = (href) => {
     return new URL(href);
   };
 
@@ -48,94 +37,46 @@ export class PageProvider {
   }
 }
 
-export class HashPageProvider extends PageProvider {
-  type = "hash";
-
-  setup() {
-    if (!window.location.hash) {
-      window.history.replaceState(null, document.title, "/#/");
-    }
-  }
-
-  getHref() {
-    const hash = window.location.hash || "#/";
-    const partialLocation = hash.replace(/^#/, "");
-    return `${window.location.origin}${partialLocation}`;
-  }
-
-  #preventDefault(event) {
-    event.preventDefault();
-  }
-
-  #applyNavigation = () => this.pushPage();
-
-  attachEvents() {
-    window.addEventListener("hashchange", this.#applyNavigation);
-    window.addEventListener("popstate", this.#preventDefault);
-  }
-
-  detachEvents() {
-    window.removeEventListener("hashchange", this.#applyNavigation);
-    window.removeEventListener("popstate", this.#preventDefault);
-  }
-}
-
-export function createPageProvider() {
-  if (window.navigation) {
-    return new PageProvider();
-  }
-  return new HashPageProvider();
-}
-
-(class AppRouter extends WebComponent {
+export class AppRouter extends WebComponent {
   static tagName = "app-router";
   static html = `
     <style>
       div {
-        height: 100%;
-        width: 100%;
+        height: var(--router-height, 100%);
+        width: var(--router-width, 100%);
       }
     </style>
     <div></div>
   `;
 
-  static handles = {
-    container: (dom) => dom.querySelector("div"),
-  };
+  container = child("div");
 
-  get type() {
-    return this.pageProvider.type;
-  }
+  #pageProvider = new PageProvider();
 
-  async #forkPageUpdates() {
-    for await (const pageParams of this.pageProvider.stream) {
-      if (!this.isConnected) {
-        this.pageProvider.detachEvents();
-        return;
-      }
-      const page = await createAsyncComponent(this.routingCallback(pageParams));
-      page.params = pageParams;
-      this.container.replaceChildren(page);
-    }
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
+  onAfterMount() {
     if (!this.routingCallback) {
       throw new Error("No routing callback provided");
     }
-    if (!this.pageProvider) {
-      this.pageProvider = createPageProvider();
-    }
-    this.pageProvider.attachEvents();
-    this.#forkPageUpdates();
+    this.#pageProvider.attachEvents();
+    this.reactTo(this.#pageProvider.stream, async (pageParams) => {
+      const page = await createAsyncComponent(this.routingCallback(pageParams));
+      page.params = pageParams;
+      this.container.replaceChildren(page);
+    });
   }
-}.setup());
 
-export function createRouter(routingCallback, pageProvider) {
+  onAfterUnmount() {
+    this.#pageProvider.detachEvents();
+  }
+
+  static {
+    this.setup();
+  }
+}
+
+export function createRouter(routingCallback) {
   const router = document.createElement("app-router");
   router.routingCallback = routingCallback;
-  router.pageProvider = pageProvider;
 
   return router;
 }

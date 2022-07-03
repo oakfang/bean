@@ -31,10 +31,8 @@ export class WebComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    const { defaultAttributes = {} } = this.constructor;
-    Object.keys(defaultAttributes).forEach((attribute) => {
-      this.setAttribute(attribute, defaultAttributes[attribute]);
-    });
+    this.#setupDOMHandlers();
+    this.#setupDefaultAttributes();
     if (this.isConnected) {
       this.onAfterMount();
     }
@@ -45,18 +43,8 @@ export class WebComponent extends HTMLElement {
     this.onAfterUnmount();
   }
 
-  #setupInDOM() {
-    const root = this.template.content.cloneNode(true);
-    Object.keys(this.constructor.handles ?? {}).forEach((handle) => {
-      const handler = this.constructor.handles[handle];
-      Object.defineProperty(this, handle, {
-        value:
-          typeof handler === "function"
-            ? handler(root)
-            : new DocumentFragment(),
-      });
-    });
-    const { events, observedAttributes } = this.constructor;
+  #setupEventListeners() {
+    const { events } = this.constructor;
     Object.keys(events).forEach((eventName) => {
       const [eventNameBase, shouldCapture] = eventName.split("^");
       const capture = shouldCapture !== undefined;
@@ -69,7 +57,10 @@ export class WebComponent extends HTMLElement {
         capture
       );
     });
+  }
 
+  #setupInitialAttributes() {
+    const { observedAttributes } = this.constructor;
     observedAttributes.forEach((attribute) => {
       this.attributeChangedCallback(
         attribute,
@@ -77,9 +68,32 @@ export class WebComponent extends HTMLElement {
         this.getAttribute(attribute)
       );
     });
+  }
+
+  #setupDOMHandlers() {
+    Reflect.ownKeys(this)
+      .filter((prop) => Child.is(this[prop]))
+      .forEach((prop) => {
+        const el = this[prop].select(this.dom);
+        this[prop] = el;
+      });
+  }
+
+  #setupDefaultAttributes() {
+    const { defaultAttributes = {} } = this.constructor;
+    Object.keys(defaultAttributes).forEach((attribute) => {
+      if (!this.hasAttribute(attribute)) {
+        this.setAttribute(attribute, defaultAttributes[attribute]);
+      }
+    });
+  }
+
+  #setupInDOM() {
+    const root = this.template.content.cloneNode(true);
+    this.#setupEventListeners();
+    this.#setupInitialAttributes();
 
     this.dom.appendChild(root);
-    this.onBeforeMount();
   }
 
   get connectionSignal() {
@@ -116,8 +130,11 @@ export class WebComponent extends HTMLElement {
     return result;
   }
 
-  onBeforeMount() {
-    // do nothing
+  async reactTo(stream, callback) {
+    const signal = this.connectionSignal;
+    for await (let snapshot of stream.untilCancelled({ signal })) {
+      await callback(snapshot);
+    }
   }
 
   onAfterMount() {
@@ -141,3 +158,19 @@ export async function createAsyncComponent(
 export const on = (eventName) => ":" + eventName;
 
 export const prop = (attr) => `${attr}:change`;
+
+class Child {
+  constructor(selector) {
+    this.selector = selector;
+  }
+
+  select(dom) {
+    return dom.querySelector(this.selector);
+  }
+
+  static is(value) {
+    return value instanceof this;
+  }
+}
+
+export const child = (selector) => new Child(selector);

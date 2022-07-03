@@ -21,9 +21,10 @@ import {
   WebComponent,
   prop,
   on,
-} from "https://cdn.jsdelivr.net/gh/oakfang/bean/base.js";
+  child,
+} from "https://cdn.jsdelivr.net/gh/oakfang/bean/bean.js";
 
-(class extends WebComponent {
+export default class extends WebComponent {
   static tagName = "my-component";
   static html = `
     <style>
@@ -36,9 +37,8 @@ import {
     </style>
     <p></p>
   `;
-  static handles = {
-    text: (dom) => dom.querySelector("p"),
-  };
+
+  text = child("p");
 
   [prop("text")](_, [newText]) {
     this.text.innerText = newText;
@@ -47,7 +47,11 @@ import {
   [on("click")]() {
     console.log("clicked");
   }
-}.setup());
+
+  static {
+    this.setup();
+  }
+}
 ```
 
 ### State
@@ -73,8 +77,8 @@ stateManager.update((current) => ({ ...current, todos: ["a", "b", "c"] }));
 ```js
 import { createRouter } from "https://cdn.jsdelivr.net/gh/oakfang/bean/router.js";
 
-const router = createRouter(({ path }) => {
-  switch (path) {
+const router = createRouter(({ pathname }) => {
+  switch (pathname) {
     case "/": {
       return import("./home.js");
     }
