@@ -25,14 +25,15 @@ export class WebComponent extends HTMLElement {
   constructor() {
     super();
     this.dom = this.attachShadow({ mode: "open" });
-    this.template = document.createElement("template");
-    this.template.innerHTML = this.constructor.html ?? "";
+    
     this.#setupInDOM();
   }
 
   connectedCallback() {
     this.#setupDOMHandlers();
+    this.#setupEventListeners();
     this.#setupDefaultAttributes();
+    this.#setupInitialAttributes();
     if (this.isConnected) {
       this.onAfterMount();
     }
@@ -88,12 +89,15 @@ export class WebComponent extends HTMLElement {
     });
   }
 
-  #setupInDOM() {
-    const root = this.template.content.cloneNode(true);
-    this.#setupEventListeners();
-    this.#setupInitialAttributes();
+  #createRootElement() {
+    const template = document.createElement("template");
+    template.innerHTML = this.constructor.html ?? "";
+    const root = template.content.cloneNode(true);
+    return root;
+  }
 
-    this.dom.appendChild(root);
+  #setupInDOM() {
+    this.dom.appendChild(this.#createRootElement());
   }
 
   get connectionSignal() {
